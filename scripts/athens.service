@@ -1,0 +1,24 @@
+[Unit]
+Description=Athens Go Module Proxy
+Documentation=https://docs.gomods.io
+After=docker.service
+Requires=docker.service
+
+[Service]
+Restart=always
+TimeoutStartSec=0
+ExecStartPre=-/usr/bin/docker stop athens-proxy
+ExecStartPre=-/usr/bin/docker rm athens-proxy
+ExecStartPre=/usr/bin/docker pull gomods/proxy:latest
+ExecStart=/usr/bin/docker run --name athens-proxy \
+                              -v /var/lib/athens:/var/lib/athens \
+                              -e ATHENS_DISK_STORAGE_ROOT=/var/lib/athens \
+                              -e ATHENS_STORAGE_TYPE=disk \
+                              --restart always \
+                              -p 3000:3000 \
+                              gomods/proxy:latest
+
+ExecStop=/usr/bin/docker stop athens-proxy
+
+[Install]
+WantedBy=multi-user.target

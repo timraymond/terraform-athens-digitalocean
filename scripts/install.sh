@@ -17,18 +17,13 @@ install_docker() {
 }
 
 main() {
-  apt update
+  apt-get update
   install_docker
 
   mkdir /var/lib/athens
-  docker run -d \
-    -v /var/lib/athens:/var/lib/athens \
-    -e ATHENS_DISK_STORAGE_ROOT=/var/lib/athens \
-    -e ATHENS_STORAGE_TYPE=disk \
-    --name athens-proxy \
-    --restart always \
-    -p 3000:3000 \
-    gomods/proxy:latest
+  systemctl daemon-reload
+  systemctl enable athens
+  systemctl start athens
 }
 
-main $@
+main "$@"
