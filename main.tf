@@ -53,6 +53,13 @@ resource "digitalocean_firewall" "athens-proxy" {
   ]
 }
 
+resource "digitalocean_volume" "athens" {
+  region      = "nyc1"
+  name        = "athens-storage"
+  size        = 10
+  description = "persistent storage for athens"
+}
+
 resource "digitalocean_droplet" "athens-proxy" {
   image              = "ubuntu-18-04-x64"
   name               = "athens-proxy"
@@ -61,6 +68,7 @@ resource "digitalocean_droplet" "athens-proxy" {
   private_networking = true
   monitoring         = false
   tags               = ["${digitalocean_tag.athens.id}"]
+  volume_ids         = ["${digitalocean_volume.athens.id}"]
 
   ssh_keys = [
     "${digitalocean_ssh_key.athens.id}",

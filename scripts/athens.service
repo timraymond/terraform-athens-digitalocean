@@ -11,7 +11,7 @@ ExecStartPre=-/usr/bin/docker stop athens-proxy
 ExecStartPre=-/usr/bin/docker rm athens-proxy
 ExecStartPre=/usr/bin/docker pull gomods/proxy:latest
 ExecStart=/usr/bin/docker run --name athens-proxy \
-                              -v /var/lib/athens:/var/lib/athens \
+                              -v /mnt/athens_storage:/var/lib/athens \
                               -e ATHENS_DISK_STORAGE_ROOT=/var/lib/athens \
                               -e ATHENS_STORAGE_TYPE=disk \
                               --restart always \

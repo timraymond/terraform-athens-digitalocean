@@ -16,11 +16,18 @@ install_docker() {
   apt install -y docker-ce
 }
 
+setup_storage() {
+  mkfs.ext4 -F /dev/disk/by-id/scsi-0DO_Volume_athens-storage
+  mkdir -p /mnt/athens_storage
+  mount -o discard,defaults,noatime /dev/disk/by-id/scsi-0DO_Volume_athens-storage /mnt/athens_storage
+  echo '/dev/disk/by-id/scsi-0DO_Volume_athens-storage /mnt/athens_storage ext4 defaults,nofail,discard 0 0' | tee -a /etc/fstab
+}
+
 main() {
   apt-get update
   install_docker
+  setup_storage
 
-  mkdir /var/lib/athens
   systemctl daemon-reload
   systemctl enable athens
   systemctl start athens
