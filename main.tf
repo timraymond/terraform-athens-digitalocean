@@ -1,5 +1,17 @@
-provider "digitalocean" {
-  token = "${var.do_token}"
+data "template_file" "init" {
+  template = "${file("${path.module}/scripts/install.sh.tmpl")}"
+
+  vars {
+    external_volume_name = "${var.external_volume_name}"
+  }
+}
+
+data "template_file" "systemd-unit" {
+  template = "${file("${path.module}/scripts/athens.service")}"
+
+  vars {
+    tag = "${var.tag}"
+  }
 }
 
 resource "digitalocean_tag" "athens" {
@@ -63,32 +75,23 @@ resource "digitalocean_volume" "athens" {
 resource "digitalocean_droplet" "athens-proxy" {
   image              = "ubuntu-18-04-x64"
   name               = "athens-proxy"
-  region             = "nyc1"
-  size               = "1gb"
-  private_networking = true
+  region             = "${var.droplet_region}"
+  size               = "${var.droplet_size}"
   monitoring         = false
   tags               = ["${digitalocean_tag.athens.id}"]
-  volume_ids         = ["${digitalocean_volume.athens.id}"]
+  volume_ids         = ["${var.external_volume_id}"]
 
   ssh_keys = [
     "${digitalocean_ssh_key.athens.id}",
   ]
 
   provisioner "file" {
-    source      = "scripts/install.sh"
-    destination = "/usr/local/bin/install.sh"
-  }
-
-  provisioner "file" {
-    source      = "scripts/athens.service"
     destination = "/etc/systemd/system/athens.service"
+    content = "${data.template_file.systemd-unit.rendered}"
   }
 
   provisioner "remote-exec" {
-    inline = [
-      "chmod +x /usr/local/bin/install.sh",
-      "/usr/local/bin/install.sh",
-    ]
+    inline = ["${data.template_file.init.rendered}"]
   }
 
   connection {
