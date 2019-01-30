@@ -9,7 +9,7 @@ provider "digitalocean" {
 }
 
 module "athens" {
-  source = "../athens"
+  source = "git@github.com:timraymond/terraform-athens-digitalocean.git"
   tag = "canary" // the tag you'd like to pull
 
   pub_key = "/path/to/your/ssh/pub/key"
